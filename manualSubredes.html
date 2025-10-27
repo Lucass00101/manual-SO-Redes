@@ -53,6 +53,24 @@
             margin: 15px 0;
             border-radius: 4px;
         }
+
+        .btn-back {
+            display: inline-block;
+            background-color: #555;
+            color: #ffffff;
+            padding: 10px 20px;
+            margin-top: 25px;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background-color: #333;
+        }
     </style>
 </head>
 
@@ -108,7 +126,8 @@
                     <ul>
                         <li><strong>Nombre:</strong> "Subred_Ventas".</li>
                         <li><strong>Rango de direcciones IP:</strong> Inicio: <code>192.168.2.100</code>, Fin:
-                            <code>192.168.2.200</code>.</li>
+                            <code>192.168.2.200</code>.
+                        </li>
                         <li><strong>Máscara de subred:</strong> <code>255.255.255.0</code>.</li>
                         <li><strong>Exclusiones:</strong> Añade IPs reservadas (por ejemplo, para impresoras).</li>
                         <li><strong>Puerta de enlace:</strong> <code>192.168.2.1</code>.</li>
@@ -236,6 +255,8 @@ sudo systemctl restart smbd
     <p>Una red bien segmentada, junto con una gestión de usuarios centralizada, proporciona seguridad y control. Las
         subredes reducen la superficie de ataque y los grupos aseguran que solo el personal autorizado acceda a los
         datos sensibles.</p>
+
+    <a href="index.html" class="btn-back">&laquo; Volver al Índice</a>
 
 </body>
 
