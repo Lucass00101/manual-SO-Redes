@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual para Crear un Usuario y Proteger su Espacio de Trabajo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        h3 {
+            color: #555;
+        }
+
+        p {
+            line-height: 1.6;
+        }
+
+        ul,
+        ol {
+            margin: 10px 0 20px 20px;
+        }
+
+        code {
+            background-color: #eaeaea;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            border-left: 6px solid #ffeeba;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Manual para Crear un Usuario y Proteger su Espacio de Trabajo</h1>
+
+    <h2>Introducción</h2>
+    <p>Este manual proporciona instrucciones detalladas para crear un usuario en sistemas operativos Windows y Linux,
+        asegurando que su espacio de trabajo (su carpeta personal) esté protegido del acceso de otros usuarios no
+        autorizados.</p>
+
+    <h2>Creación de Usuario en Windows (Local)</h2>
+
+    <h3>Pasos para crear un usuario (Método Gráfico)</h3>
+    <ol>
+        <li>Accede a <strong>Configuración</strong> (presionando <code>Win + I</code>).</li>
+        <li>Haz clic en <strong>Cuentas</strong>.</li>
+        <li>Selecciona <strong>Familia y otros usuarios</strong> (u <strong>Otros usuarios</strong>).</li>
+        <li>Bajo "Otros usuarios", haz clic en <strong>Agregar a otra persona a este PC</strong>.</li>
+        <li>Selecciona <strong>No tengo los datos de inicio de sesión de esta persona</strong>.</li>
+        <li>Luego selecciona <strong>Agregar un usuario sin cuenta de Microsoft</strong>.</li>
+        <li>Introduce un <strong>nombre de usuario</strong> (ej. <code>invitado</code>), una <strong>contraseña
+                segura</strong> y completa las preguntas de seguridad.</li>
+        <li>Haz clic en <strong>Siguiente</strong>. El usuario será creado.</li>
+    </ol>
+
+    <h3>Pasos para crear un usuario (Línea de Comandos)</h3>
+    <ol>
+        <li>Abre <strong>PowerShell</strong> o <strong>CMD</strong> como <strong>Administrador</strong>.</li>
+        <li>Ejecuta el siguiente comando para crear el usuario (cambia <code>nombre_usuario</code> y
+            <code>ContraseñaSegura!</code>):<br>
+            <code>net user nombre_usuario ContraseñaSegura! /add</code>
+        </li>
+        <li>Esto crea el usuario y su carpeta de perfil (<code>C:\Users\nombre_usuario</code>) la primera vez que inicie
+            sesión.</li>
+    </ol>
+
+    <h3>Proteger el Espacio de Trabajo</h3>
+    <ul>
+        <li><strong>Tipo de Cuenta (Usuario Estándar):</strong> Los usuarios creados así son <strong>Usuarios
+                Estándar</strong>, lo que les impide instalar software o acceder a los archivos de otros.</li>
+        <li><strong>Permisos NTFS:</strong> Windows protege automáticamente la carpeta
+            <code>C:\Users\nombre_usuario</code>, dando control total solo al usuario y a los administradores.</li>
+        <li><strong>Cifrado (BitLocker):</strong> En Windows Pro o Enterprise, activa <strong>BitLocker</strong> para
+            cifrar todo el disco duro.</li>
+    </ul>
+
+    <h2>Creación de Usuario en Linux (Ubuntu/Debian)</h2>
+
+    <h3>Pasos para crear un usuario</h3>
+    <ol>
+        <li>Abre una <strong>Terminal</strong> (<code>Ctrl + Alt + T</code>).</li>
+        <li>Ejecuta:<br>
+            <code>sudo adduser nombre_usuario</code>
+        </li>
+        <li>Introduce tu contraseña de administrador (<code>sudo</code>).</li>
+        <li>Define la contraseña para el nuevo usuario y confirma.</li>
+        <li>Completa la información adicional o presiona Enter para omitirla.</li>
+        <li>Confirma escribiendo "S".</li>
+    </ol>
+
+    <h3>Proteger el Espacio de Trabajo</h3>
+    <ul>
+        <li><strong>Permisos del Directorio Home:</strong> Por defecto, <code>/home/nombre_usuario</code> suele tener
+            permisos <code>755</code>. Para hacerlo privado:
+            <br><code>sudo chmod 700 /home/nombre_usuario</code>
+            <br>(<code>700</code> = solo el propietario tiene acceso).
+        </li>
+        <li><strong>Configuración de Umask:</strong> Para que los nuevos archivos sean privados, edita
+            <code>/home/nombre_usuario/.bashrc</code> y agrega:<br>
+            <code>umask 077</code>
+        </li>
+        <li><strong>Firewall (UFW):</strong> Activa el firewall básico de Ubuntu:<br>
+            <code>sudo ufw enable</code>
+        </li>
+        <li><strong>Cifrado (LUKS / eCryptfs):</strong> Durante la instalación, Ubuntu permite cifrar el disco completo
+            (<strong>LUKS</strong>) o solo la carpeta personal (<strong>eCryptfs</strong>).</li>
+    </ul>
+
+    <div class="note">
+        <strong>Nota:</strong> La protección del espacio de trabajo se basa en los <strong>permisos del sistema de
+            archivos</strong> (NTFS en Windows y POSIX en Linux), que impiden el acceso no autorizado a archivos
+        privados.
+    </div>
+
+    <h2>Conclusión</h2>
+    <p>Siguiendo estos pasos, podrás crear usuarios en Windows y Linux de forma segura. La clave está en usar cuentas
+        estándar y asegurar que las carpetas personales sean privadas mediante permisos correctos y, opcionalmente,
+        cifrado.</p>
+
+</body>
+
+</html>

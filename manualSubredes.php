@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Subredes y Gestión de Acceso de Usuarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #333;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+
+        pre {
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+
+        ul,
+        ol {
+            margin-left: 20px;
+        }
+
+        code {
+            font-family: monospace;
+            background-color: #f9f9f9;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+
+        .clarification {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Manual de Subredes y Gestión de Acceso de Usuarios</h1>
+
+    <h2>Introducción</h2>
+    <p>Este manual guía a los administradores en dos tareas conceptualmente diferentes pero relacionadas:</p>
+    <ol>
+        <li><strong>Configuración de Servicios de Subred:</strong> Preparar un servidor para gestionar direcciones IP
+            (DHCP) para una subred ya existente.</li>
+        <li><strong>Gestión de Acceso de Usuarios:</strong> Crear grupos de usuarios para controlar quién puede acceder
+            a los recursos (como archivos o impresoras) alojados en los servidores de esa subred.</li>
+    </ol>
+
+    <div class="clarification">
+        <strong>Aclaración Importante:</strong> Las "subredes" (ej. <code>192.168.1.0/24</code>) no se "crean" en un
+        sistema operativo, sino en un <strong>router</strong> o <strong>switch de Capa 3</strong>. Allí es donde se
+        define el enrutamiento entre ellas. Los servidores (como Windows Server o Linux) se configuran para
+        <em>participar</em> en esa subred, por ejemplo, ofreciendo servicios como DHCP (asignación de IPs) para la
+        misma.
+    </div>
+
+    <h2>Requisitos Previos</h2>
+    <ul>
+        <li>Acceso administrativo a los servidores (Windows Server y/o Linux).</li>
+        <li>Acceso de configuración al router o firewall de la red (para la creación real de la subred y VLANs).</li>
+        <li>Conocimiento básico de direccionamiento IP, máscaras de subred (CIDR) y VLANs.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Parte 1: Configuración de Servicios para una Subred (DHCP)</h2>
+    <p>Estos pasos asumen que la subred (ej. <code>192.168.2.0/24</code>) y su VLAN correspondiente ya han sido creadas
+        en su router.</p>
+
+    <h3>1.1 En Windows Server (Rol de DHCP)</h3>
+    <ol>
+        <li><strong>Instalar el Rol de DHCP:</strong>
+            <ul>
+                <li>Abre el "Administrador del Servidor".</li>
+                <li>Ve a "Administrar" &gt; "Agregar roles y características".</li>
+                <li>Sigue el asistente y en "Roles de servidor", selecciona <strong>"Servidor DHCP"</strong>. Completa
+                    la instalación.</li>
+            </ul>
+        </li>
+        <li><strong>Configurar el Ámbito DHCP:</strong>
+            <ul>
+                <li>En el "Administrador del Servidor", ve a "Herramientas" &gt; "DHCP".</li>
+                <li>Expande tu servidor, haz clic derecho en "IPv4" y selecciona <strong>"Ámbito nuevo..."</strong>.
+                </li>
+                <li>Sigue el asistente:
+                    <ul>
+                        <li><strong>Nombre:</strong> "Subred_Ventas".</li>
+                        <li><strong>Rango de direcciones IP:</strong> Inicio: <code>192.168.2.100</code>, Fin:
+                            <code>192.168.2.200</code>.</li>
+                        <li><strong>Máscara de subred:</strong> <code>255.255.255.0</code>.</li>
+                        <li><strong>Exclusiones:</strong> Añade IPs reservadas (por ejemplo, para impresoras).</li>
+                        <li><strong>Puerta de enlace:</strong> <code>192.168.2.1</code>.</li>
+                        <li><strong>Servidores DNS:</strong> <code>192.168.1.5</code>, <code>8.8.8.8</code>.</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>Activar el ámbito:</strong> Haz clic derecho sobre el nuevo ámbito y selecciona "Activar".</li>
+        <li><strong>(Importante) Configurar el "IP Helper" / "DHCP Relay":</strong>
+            <ul>
+                <li>Si el servidor DHCP está en otra subred, configura el router para reenviar las peticiones DHCP
+                    (Broadcast) de la subred 2 a la IP del servidor DHCP. Esto se llama "IP Helper" (Cisco) o "DHCP
+                    Relay".</li>
+            </ul>
+        </li>
+    </ol>
+
+    <p><strong>Alternativa con PowerShell:</strong></p>
+    <pre><code># Instalar el rol
+Install-WindowsFeature DHCP -IncludeManagementTools
+
+# Crear el ámbito (Scope)
+Add-DhcpServerv4Scope -Name "Subred_Ventas" -StartRange 192.168.2.100 -EndRange 192.168.2.200 -SubnetMask 255.255.255.0
+
+# Configurar opciones (Router y DNS)
+Set-DhcpServerv4OptionValue -ScopeId 192.168.2.0 -OptionId 3 -Value 192.168.2.1
+Set-DhcpServerv4OptionValue -ScopeId 192.168.2.0 -OptionId 6 -Value "192.168.1.5","8.8.8.8"
+</code></pre>
+
+    <h3>1.2 En Linux (Ubuntu con ISC-DHCP-Server)</h3>
+    <p>Usamos <code>isc-dhcp-server</code> por ser el estándar más robusto, aunque <code>dnsmasq</code> es una
+        alternativa ligera.</p>
+    <ol>
+        <li><strong>Instalar el servidor DHCP:</strong>
+            <pre><code>sudo apt update
+sudo apt install isc-dhcp-server
+</code></pre>
+        </li>
+        <li><strong>Configurar la interfaz de escucha:</strong>
+            <ul>
+                <li>Edita <code>/etc/default/isc-dhcp-server</code>.</li>
+                <li>Define la interfaz: <code>INTERFACESv4="eth0"</code></li>
+            </ul>
+        </li>
+        <li><strong>Definir la subred en dhcpd.conf:</strong>
+            <pre><code># Definición para la Subred de Ventas
+subnet 192.168.2.0 netmask 255.255.255.0 {
+    range 192.168.2.100 192.168.2.200;
+    option routers 192.168.2.1;
+    option domain-name-servers 192.168.1.5, 8.8.8.8;
+    default-lease-time 600;
+    max-lease-time 7200;
+}
+</code></pre>
+        </li>
+        <li><strong>Reiniciar el servicio:</strong>
+            <pre><code>sudo dhcpd -t
+sudo systemctl restart isc-dhcp-server
+</code></pre>
+        </li>
+    </ol>
+
+    <hr>
+
+    <h2>Parte 2: Gestión de Grupos de Usuarios para Control de Acceso</h2>
+    <p>Aquí creamos grupos de usuarios para controlar el acceso a los recursos compartidos de la red.</p>
+
+    <h3>2.1 En Windows Server (con Active Directory)</h3>
+    <ol>
+        <li><strong>Crear el Grupo de Seguridad:</strong>
+            <ul>
+                <li>Abre "Usuarios y equipos de Active Directory".</li>
+                <li>OU: "Grupos_Ventas".</li>
+                <li>Nuevo &gt; Grupo &gt; <code>G_Acceso_Subred_Ventas</code>.</li>
+                <li>Tipo: Seguridad, Ámbito: Global.</li>
+            </ul>
+        </li>
+        <li><strong>Añadir Usuarios:</strong>
+            <pre><code>Agregar usuario &gt; Propiedades &gt; Miembro de &gt; G_Acceso_Subred_Ventas</code></pre>
+        </li>
+        <li><strong>Aplicar Permisos:</strong>
+            <ul>
+                <li>Carpeta compartida: <code>D:\Ventas_Data</code></li>
+                <li>Propiedades &gt; Seguridad &gt; Agregar &gt; Grupo creado &gt; Permisos (Modificar).</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>2.2 En Linux (Ubuntu)</h3>
+    <ol>
+        <li><strong>Crear grupo:</strong>
+            <pre><code>sudo groupadd ventas_acceso</code></pre>
+        </li>
+        <li><strong>Añadir usuarios:</strong>
+            <pre><code>sudo usermod -aG ventas_acceso jperez</code></pre>
+        </li>
+        <li><strong>Configurar Samba:</strong>
+            <pre><code>[VentasData]
+path = /srv/samba/ventas
+read only = no
+guest ok = no
+valid users = @ventas_acceso
+</code></pre>
+
+            <pre><code>sudo chgrp -R ventas_acceso /srv/samba/ventas
+sudo chmod -R 770 /srv/samba/ventas
+sudo systemctl restart smbd
+</code></pre>
+        </li>
+    </ol>
+
+    <hr>
+
+    <h2>Parte 3: Controles de Seguridad Pertinentes</h2>
+    <ol>
+        <li><strong>Segmentación y Firewall entre Subredes:</strong> Aplica el principio de mínimo privilegio.</li>
+        <li><strong>Asignación de VLANs (Capa 2):</strong> Cada subred IP debe mapearse a una VLAN separada.</li>
+        <li><strong>Network Access Control (802.1X):</strong> Usa autenticación RADIUS/NPS.</li>
+        <li><strong>Reservas DHCP y Port Security:</strong> Controla qué dispositivos pueden conectarse.</li>
+        <li><strong>Auditoría y Monitoreo:</strong> Revisa logs de acceso y tráfico entre subredes.</li>
+    </ol>
+
+    <h2>Conclusión</h2>
+    <p>Una red bien segmentada, junto con una gestión de usuarios centralizada, proporciona seguridad y control. Las
+        subredes reducen la superficie de ataque y los grupos aseguran que solo el personal autorizado acceda a los
+        datos sensibles.</p>
+
+</body>
+
+</html>
