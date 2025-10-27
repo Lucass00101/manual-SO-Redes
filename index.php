@@ -67,14 +67,15 @@
     <div class="container">
         <h1>Índice de Manuales</h1>
         
-        <a href="manualSubredes.php" class="btn">
+        <a href="manualSubredes.html" class="btn">
             Manual Sub-redes y Sumar usuarios
         </a>
         
-        <a href="manualUsuarios.php" class="btn btn-secondary">
+        <a href="manualUsuarios.html" class="btn btn-secondary">
             Manual Crear un usuario
         </a>
     </div>
 
 </body>
+
 </html>
